@@ -62,4 +62,32 @@ class Chapter2Test extends FreeSpec
       assert(isSortedWithOrd(Array(1.milli, 1.5.millis, 2.millis, 3.millis)) === true)
     }
   }
+
+  "2.3 - curry" - {
+    "convert fn(1, 2) into fn(1)(2)" in {
+      val curriedFn: (Int) ⇒ (Int) ⇒ Int = curry { (a: Int, b: Int) ⇒ a * 2 * b }
+      assert(curriedFn(3)(5) === 30)
+    }
+  }
+
+  "2.4 - uncurry" in {
+    // A => (B => C) → A => B => C
+    val uncurriedFn: (Int, Int) ⇒ Int =
+      uncurry[Int, Int, Int]({ (a: Int) ⇒  { (b: Int) ⇒ (a * 2) * b }})
+
+    assert(uncurriedFn(3, 5) === 30)
+  }
+
+  "2.5 - compose" - {
+    val timesTwo:  (Int) ⇒ Int = _ * 2
+    val timesFive: (Int) ⇒ Int = _ * 5
+
+    "Works by hand" in {
+      assert(compose(timesTwo)(timesFive)(2) === 20)
+    }
+
+    "Works when cheating" in {
+      assert(composeCheat(timesTwo)(timesFive)(2) === 20)
+    }
+  }
 }

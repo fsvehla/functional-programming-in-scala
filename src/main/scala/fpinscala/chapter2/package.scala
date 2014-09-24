@@ -82,4 +82,19 @@ package object chapter2 {
 
     walk(1, as(0))
   }
+
+  // 2.3
+  def curry[A, B, C](fn: (A, B) ⇒ C): A ⇒ (B ⇒ C) =
+    { (a: A) ⇒
+      { (b: B) ⇒
+        fn(a, b) } }
+
+  // 2.4
+  def uncurry[A, B, C](fn: A ⇒ (B ⇒ C)): (A, B) ⇒ C = {
+    { (a: A, b: B) ⇒
+      fn(a)(b) } }
+
+  // 2.5
+  def compose[A, B, C](f: B ⇒ C)(g: A ⇒ B): A ⇒ C = { (a:A) ⇒ f(g(a)) }
+  def composeCheat[A, B, C](f: B ⇒ C)(g: A ⇒ B): A ⇒ C = f compose g
 }

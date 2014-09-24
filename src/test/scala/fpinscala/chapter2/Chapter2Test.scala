@@ -4,6 +4,8 @@ import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest.FreeSpec
 import org.scalatest.prop.TableDrivenPropertyChecks
 
+import scala.concurrent.duration.{DurationDouble, DurationInt}
+
 class Chapter2Test extends FreeSpec
   with TypeCheckedTripleEquals
   with TableDrivenPropertyChecks {
@@ -56,6 +58,8 @@ class Chapter2Test extends FreeSpec
       assert(isSortedWithOrd(Array(1, 2, 2, 2)) === true)
       assert(isSortedWithOrd(Array(1, 2, 2, 3)) === true)
       assert(isSortedWithOrd(Array(1, 4, 3, 4)) === false)
+
+      assert(isSortedWithOrd(Array(1.milli, 1.5.millis, 2.millis, 3.millis)) === true)
     }
   }
 }

@@ -1,5 +1,7 @@
 package fpinscala.chapter3
 
+import fpinscala.chapter3
+
 import scala.annotation.tailrec
 
 sealed trait List[+A]
@@ -8,6 +10,8 @@ case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
 object List {
   val Nil = fpinscala.chapter3.Nil
+
+  def empty[A]: List[A] = Nil
 
   def sum(ints: List[Int]): Int = ints match {
     case Nil ⇒ 0
@@ -56,11 +60,15 @@ object List {
   }
 
   // Code Listing
-  private[this] def append[A](a1: List[A], a2: List[A]): List[A] =
+  def append[A](a1: List[A], a2: List[A]): List[A] =
     a1 match {
       case Nil => a2
       case Cons(h,t) => Cons(h, append(t, a2))
     }
+
+  // 3.14
+  def appendWithFoldLeft[A](a1: List[A], a2: List[A]): List[A] =
+    foldLeft(a1, a2) { case (a, b) ⇒ Cons(b, a) }
 
   // 3.6
   def init[A](l: List[A]): List[A] = {
@@ -99,6 +107,57 @@ object List {
     foldRight(list, List[A]()) { case (e, acc) ⇒
       append(acc, List(e))
     }
+
+  def transformByAdding1(list: List[Int]): List[Int] = {
+    @tailrec
+    def walk(rest: List[Int], acc: List[Int]): List[Int] = rest match {
+      case chapter3.Nil     ⇒ acc
+      case Cons(head, tail) ⇒ walk(tail, Cons(head + 1, acc))
+    }
+
+    walk(reverse(list), Nil)
+  }
+
+  def transformByAdding1WithTailRec(list: List[Int]): List[Int] =
+    foldRight(list, List[Int]()) { case (e, acc) ⇒ Cons(e + 1, acc) }
+
+  def transformDoubleToString(list: List[Double]): List[String] =
+    foldRight(list, List[String]()) { case (e, acc) ⇒ Cons(e.toString, acc) }
+
+  def map[A, B](as: List[A])(f: A ⇒ B): List[B] = {
+    foldRight(as, List.empty[B]) { case (e, acc) ⇒ Cons(f(e), acc) }
+  }
+
+  def filter[A](as: List[A])(f: A ⇒ Boolean): List[A] =
+    foldRight(as, List.empty[A]) { case (e, acc) ⇒
+      if (f(e)) Cons(e, acc) else acc
+    }
+
+  def flatMap[A, B](as: List[A])(f: A ⇒ List[B]): List[B] =
+    foldRight(as, List.empty[B]) { case (e, acc) ⇒
+      val result: List[B] = f(e)
+
+      // The structure itself is built, and  iterated right-to-left
+      append(result, acc)
+    }
+
+  def filterWithFlatMap[A](as: List[A])(f: A ⇒ Boolean): List[A] =
+    flatMap(as) { e: A ⇒ if(f(e)) List(e) else Nil }
+
+  // We can do a tail-recursive function that pattern-matches over both.
+  // Stolen from GitHub repo fpinscala/fpinscala
+  def intZipAdd(fst: List[Int], snd: List[Int]): List[Int] = (fst, snd) match {
+    case (Nil, Nil) ⇒ Nil
+    case (_,  Nil)  ⇒ Nil
+    case (Nil, _)   ⇒ Nil
+    case (Cons(fstH, fstT), Cons(sndH, sndT)) ⇒ Cons(fstH + sndH, intZipAdd(fstT, sndT))
+  }
+
+  def zipWith[A, B, C](fst: List[A], snd: List[B])(f: (A, B) ⇒ C): List[C] = (fst, snd) match {
+    case (Nil, _) ⇒ Nil
+    case (_, Nil) ⇒ Nil
+    case (Cons(fstH, fstT), Cons(sndH, sndT)) ⇒ Cons(f(fstH, sndH), zipWith(fstT, sndT)(f))
+  }
 }
 
 trait Summable[A] {
